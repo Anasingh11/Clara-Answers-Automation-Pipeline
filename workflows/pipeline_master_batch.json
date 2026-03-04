@@ -1,0 +1,92 @@
+{
+    "name": "Master Batch Pipeline",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "1d8a8cba-6d6a-4933-909d-000000000001",
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                240,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "command": "node scripts/batch_run.js --force --verbose"
+            },
+            "id": "1d8a8cba-6d6a-4933-909d-000000000002",
+            "name": "Run Batch Pipeline",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "filePath": "/outputs/batch_summary.json"
+            },
+            "id": "1d8a8cba-6d6a-4933-909d-000000000003",
+            "name": "Read Batch Summary",
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "id": "1d8a8cba-6d6a-4933-909d-000000000004",
+            "name": "Move Binary Data",
+            "type": "n8n-nodes-base.moveBinaryData",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Run Batch Pipeline",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Run Batch Pipeline": {
+            "main": [
+                [
+                    {
+                        "node": "Read Batch Summary",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Batch Summary": {
+            "main": [
+                [
+                    {
+                        "node": "Move Binary Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {}
+}

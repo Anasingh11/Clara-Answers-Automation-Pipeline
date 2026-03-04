@@ -11,8 +11,11 @@ services:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=clara2024
+      - N8N_ENCRYPTION_KEY=clara_secret_key_2024
       - GENERIC_TIMEZONE=America/New_York
       - NODE_ENV=production
+      # Allow n8n to execute local commands and access the filesystem
+      - N8N_BLOCK_FS_WRITE_ACCESS=false
     volumes:
       - n8n_data:/home/node/.n8n
       - ./data:/data
@@ -20,6 +23,7 @@ services:
       - ./scripts:/scripts
       - ./templates:/templates
       - ./config.js:/app/config.js
+      - ./package.json:/app/package.json
     working_dir: /app
 
 volumes:
