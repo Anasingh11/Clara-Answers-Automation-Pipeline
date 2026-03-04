@@ -1,0 +1,177 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Account Memo",
+    "type": "object",
+    "required": [
+        "account_id",
+        "company_name"
+    ],
+    "properties": {
+        "account_id": {
+            "type": "string"
+        },
+        "company_name": {
+            "type": "string"
+        },
+        "business_hours": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "string"
+                },
+                "end": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "saturday": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "office_address": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "services_supported": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "emergency_definition": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "emergency_routing_rules": {
+            "type": "object",
+            "properties": {
+                "call_chain": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "phone": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "role": {
+                                "type": "string"
+                            },
+                            "timeout_seconds": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "fallback_message": {
+                    "type": "string"
+                },
+                "callback_guarantee_minutes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "non_emergency_routing_rules": {
+            "type": "object",
+            "properties": {
+                "business_hours": {
+                    "type": "string"
+                },
+                "after_hours": {
+                    "type": "string"
+                }
+            }
+        },
+        "call_transfer_rules": {
+            "type": "object",
+            "properties": {
+                "transfer_number": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "timeout_seconds": {
+                    "type": "integer"
+                },
+                "retry_count": {
+                    "type": "integer"
+                },
+                "fail_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "integration_constraints": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "after_hours_flow_summary": {
+            "type": "string"
+        },
+        "office_hours_flow_summary": {
+            "type": "string"
+        },
+        "greeting_business_hours": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "greeting_after_hours": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "special_rules": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "questions_or_unknowns": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "notes": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
+        "created_at": {
+            "type": "string"
+        },
+        "updated_at": {
+            "type": "string"
+        }
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "clara-pipeline",
+  "version": "1.0.0",
+  "description": "Clara Answers – Zero-Cost Automation Pipeline: Demo Call → Retell Agent Draft → Onboarding Updates → Agent Revision",
+  "main": "scripts/batch_run.js",
+  "scripts": {
+    "extract": "node scripts/extract_memo.js",
+    "generate": "node scripts/generate_agent.js",
+    "update": "node scripts/apply_updates.js",
+    "changelog": "node scripts/generate_changelog.js",
+    "batch": "node scripts/batch_run.js",
+    "batch:force": "node scripts/batch_run.js --force",
+    "validate": "node scripts/validate_outputs.js",
+    "transcribe:install": "pip install openai-whisper setuptools-rust",
+    "transcribe": "python scripts/transcribe_audio.py",
+    "dashboard": "node scripts/dashboard_server.js"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "express": "^4.18.2",
+    "js-yaml": "^4.1.0",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}

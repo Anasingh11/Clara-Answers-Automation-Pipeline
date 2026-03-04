@@ -1,0 +1,79 @@
+[Demo Call Transcript]
+Account: Ben's Electric (bens_electric)
+Date: 2024-11-15
+Duration: 1:12:15
+Participants: Clara Sales Rep (Jordan), Ben Penoyer (Owner), Mike (Operations Manager)
+
+---
+
+Jordan: Hey Ben, Mike, thanks for jumping on with us today. I know you guys have been dealing with some challenges around call handling. Why don't you give me a quick overview of what's going on at Ben's Electric right now?
+
+Ben: Yeah absolutely. So we're an electrical contracting company, we do both commercial and residential work here in the Charlotte, North Carolina area. We've been around about twelve years now. The big issue for us is that we're missing a lot of calls, especially after hours. We get emergency calls for things like power outages, panel failures, arcing issues, and right now those just go to voicemail after 5 PM.
+
+Jordan: Got it. And what happens during business hours?
+
+Mike: During the day we've got a receptionist, Sarah, but she's also handling dispatching and invoicing so calls get backed up. We probably miss fifteen to twenty percent of calls during the day just because the line's busy or she's away from the desk.
+
+Jordan: That's significant. So what are your normal business hours?
+
+Ben: We're open Monday through Friday, 7 AM to 5 PM. We do have a Saturday on-call rotation but that's just for emergencies.
+
+Jordan: And when an emergency comes in after hours, what happens currently?
+
+Ben: Right now it goes to voicemail and then I check voicemail maybe every hour or so. If it sounds urgent I'll call them back. But honestly we've lost some customers because of that delay. If someone has a sparking panel at 10 PM, they don't want to leave a voicemail and wait.
+
+Jordan: Makes total sense. Let me show you how Clara would handle that. So Clara is an AI-powered voice agent — she picks up every call, identifies whether it's an emergency or not, and routes accordingly. Let me play a quick demo for you.
+
+[Demo playback of Clara handling a simulated after-hours emergency call]
+
+Ben: Wow, that sounded really natural. She even asked for the address right away. That's exactly what our techs need — name, number, and address so they can roll immediately.
+
+Jordan: Exactly. And for non-emergencies, Clara would collect the caller's info and schedule a callback during business hours. No midnight voicemails, no missed revenue.
+
+Mike: What about during the day? Can she handle calls when Sarah's busy?
+
+Jordan: Absolutely. Clara can be set up as your primary answering service or as an overflow — only picking up when Sarah can't get to the phone within a certain number of rings.
+
+Ben: I think overflow makes more sense for us during business hours. Sarah knows our customers. But after hours, Clara should be primary for sure.
+
+Jordan: Perfect. Now in terms of emergencies, can you give me a sense of what you'd consider a true electrical emergency?
+
+Ben: Anything involving sparking, arcing, burning smell from electrical, a panel that's hot to the touch, complete power loss in a commercial building, or exposed wiring. Those are the ones where someone needs to get out there fast.
+
+Mike: Also if we have a facility maintenance client — we've got three or four big commercial accounts — and their fire alarm panel goes down, that's an emergency too because they can't operate.
+
+Jordan: Good to know. And for emergencies, who should Clara try to reach?
+
+Ben: First try me on my cell. If I don't pick up, try Mike. If Mike doesn't pick up, try our third tech Dave. Someone should always be reachable.
+
+Jordan: Got it. And what if nobody picks up?
+
+Ben: That hasn't happened yet but I guess Clara should take all their info and tell them someone will call back within thirty minutes.
+
+Jordan: Perfect. Now you mentioned you use some kind of service management software?
+
+Mike: Yeah we use ServiceTrade for our commercial accounts. For residential we just use QuickBooks.
+
+Jordan: Ok good to know. Clara can potentially integrate with ServiceTrade down the road to auto-create jobs. But we'd want to be careful about how that's configured.
+
+Ben: Yeah I wouldn't want the AI creating jobs automatically. That should be a human decision. Clara can collect the info and then we create the job.
+
+Jordan: Understood. That's actually a really common preference. So let's talk about next steps. Where are you guys at in terms of moving forward?
+
+Ben: I think we're pretty interested. Mike and I need to chat about it. What does pricing look like?
+
+Jordan: It's a pay-as-you-go model. You only pay for the minutes Clara is actually on calls. No setup fee. Let me send you the rate card after this call.
+
+Ben: Sounds good. I think we'll probably want to start with after-hours only and see how it goes. If it works well we'll add the overflow during business hours.
+
+Mike: One more question — our commercial clients sometimes call with specific account numbers or PO numbers. Can Clara capture that?
+
+Jordan: She can! We'd set her up to ask for relevant reference numbers during the intake flow. Good question.
+
+Ben: Alright let's plan to circle back early next week. I feel good about this.
+
+Jordan: Sounds great. I'll send over the pricing info and a summary of what we discussed. Talk to you soon!
+
+Ben: Thanks Jordan.
+
+[End of call]

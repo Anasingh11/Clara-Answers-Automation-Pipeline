@@ -1,0 +1,179 @@
+{
+    "name": "Clara Pipeline A - Demo to Agent v1",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "pipeline-a",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                300
+            ],
+            "webhookId": "pipeline-a-trigger"
+        },
+        {
+            "parameters": {
+                "functionCode": "// Read transcript file from webhook body or file path\nconst inputData = items[0].json;\nconst fs = require('fs');\nconst path = require('path');\n\nlet transcriptPath = inputData.file_path;\nif (!transcriptPath) {\n  // If no file_path, check for inline transcript text\n  if (inputData.transcript_text) {\n    // Write to temp file\n    transcriptPath = '/tmp/transcript_' + Date.now() + '.txt';\n    fs.writeFileSync(transcriptPath, inputData.transcript_text);\n  } else {\n    throw new Error('No file_path or transcript_text provided');\n  }\n}\n\n// Verify file exists\nif (!fs.existsSync(transcriptPath)) {\n  throw new Error('Transcript file not found: ' + transcriptPath);\n}\n\nreturn [{ json: { file_path: transcriptPath, timestamp: new Date().toISOString() } }];"
+            },
+            "id": "validate-input",
+            "name": "Validate Input",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "command": "node /scripts/extract_memo.js \"{{ $json.file_path }}\" v1"
+            },
+            "id": "extract-memo",
+            "name": "Extract Account Memo",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Parse the extracted memo from command output\nconst stdout = items[0].json.stdout;\ntry {\n  const memo = JSON.parse(stdout);\n  return [{ json: { memo, account_id: memo.account_id, company_name: memo.company_name } }];\n} catch (e) {\n  throw new Error('Failed to parse memo JSON: ' + e.message + '\\nOutput: ' + stdout);\n}"
+            },
+            "id": "parse-memo",
+            "name": "Parse Memo JSON",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Generate agent spec from memo\nconst memo = items[0].json.memo;\nconst { generateAgentSpec } = require('/scripts/generate_agent');\nconst spec = generateAgentSpec(memo);\nreturn [{ json: { memo, spec, account_id: memo.account_id } }];"
+            },
+            "id": "generate-spec",
+            "name": "Generate Agent Spec",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Write outputs to storage\nconst fs = require('fs');\nconst path = require('path');\nconst data = items[0].json;\nconst outputDir = path.join('/outputs/accounts', data.account_id, 'v1');\n\n// Create directory\nfs.mkdirSync(outputDir, { recursive: true });\n\n// Write memo\nfs.writeFileSync(path.join(outputDir, 'memo.json'), JSON.stringify(data.memo, null, 2));\n\n// Write agent spec\nfs.writeFileSync(path.join(outputDir, 'agent_spec.json'), JSON.stringify(data.spec, null, 2));\n\nreturn [{ json: { \n  status: 'success', \n  account_id: data.account_id,\n  version: 'v1',\n  outputs: {\n    memo: path.join(outputDir, 'memo.json'),\n    agent_spec: path.join(outputDir, 'agent_spec.json')\n  }\n} }];"
+            },
+            "id": "store-outputs",
+            "name": "Store Outputs",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Create task tracker entry\nconst fs = require('fs');\nconst data = items[0].json;\nconst tasksFile = '/outputs/tasks.json';\n\nlet tasks = { tasks: [] };\nif (fs.existsSync(tasksFile)) {\n  tasks = JSON.parse(fs.readFileSync(tasksFile, 'utf-8'));\n}\n\nconst task = {\n  id: 'TASK-' + String(tasks.tasks.length + 1).padStart(3, '0'),\n  account_id: data.account_id,\n  version: 'v1',\n  status: 'completed',\n  pipeline: 'Pipeline A (Demo → Agent)',\n  created_at: new Date().toISOString(),\n  updated_at: new Date().toISOString()\n};\n\ntasks.tasks.push(task);\nfs.writeFileSync(tasksFile, JSON.stringify(tasks, null, 2));\n\nreturn [{ json: { ...data, task } }];"
+            },
+            "id": "create-task",
+            "name": "Create Task",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1560,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Validate Input",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate Input": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Account Memo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Account Memo": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Memo JSON",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Memo JSON": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Agent Spec",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Agent Spec": {
+            "main": [
+                [
+                    {
+                        "node": "Store Outputs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Store Outputs": {
+            "main": [
+                [
+                    {
+                        "node": "Create Task",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        {
+            "name": "clara-pipeline"
+        },
+        {
+            "name": "demo-to-agent"
+        }
+    ]
+}

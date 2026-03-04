@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clara Pipeline Dashboard</title>
+  <meta name="description" content="Clara Answers automation pipeline dashboard — view accounts, agent configurations, and version diffs.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f0f13;
+      --bg-secondary: #18181f;
+      --bg-card: #1e1e28;
+      --bg-hover: #262633;
+      --border: #2a2a3a;
+      --text-primary: #e8e8f0;
+      --text-secondary: #9090a8;
+      --text-muted: #606078;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #ff7675;
+      --info: #74b9ff;
+      --diff-add: #00b89420;
+      --diff-add-border: #00b894;
+      --diff-remove: #ff767520;
+      --diff-remove-border: #ff7675;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header h1::before { content: '◆'; font-size: 0.8em; }
+
+    .header-stats {
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat-pill {
+      background: var(--bg-primary);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .stat-pill strong { color: var(--accent-light); }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 70px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 0 16px;
+      margin-bottom: 12px;
+    }
+
+    .account-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .account-item:hover { background: var(--bg-hover); }
+    .account-item.active {
+      background: var(--bg-hover);
+      border-left-color: var(--accent);
+    }
+
+    .account-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .version-badges {
+      display: flex;
+      gap: 4px;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .badge-v1 { background: var(--info); color: #000; }
+    .badge-v2 { background: var(--success); color: #000; }
+
+    /* ── Main Content ── */
+    .main-content {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .empty-state::before {
+      content: '←';
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .tab-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* ── JSON Viewer ── */
+    .json-viewer {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      max-height: 600px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .json-key { color: var(--accent-light); }
+    .json-string { color: var(--success); }
+    .json-number { color: var(--warning); }
+    .json-boolean { color: var(--info); }
+    .json-null { color: var(--text-muted); }
+
+    /* ── Diff Viewer ── */
+    .diff-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .diff-header {
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .diff-field {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent-light);
+    }
+
+    .diff-reason {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .diff-body { padding: 12px 16px; }
+
+    .diff-row {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 12px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .diff-row.removed {
+      background: var(--diff-remove);
+      border-left: 3px solid var(--diff-remove-border);
+    }
+
+    .diff-row.added {
+      background: var(--diff-add);
+      border-left: 3px solid var(--diff-add-border);
+    }
+
+    .diff-label {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    /* ── Prompt Viewer ── */
+    .prompt-viewer {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      max-height: 700px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text-secondary);
+    }
+
+    /* ── Info Grid ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .info-item {
+      padding: 12px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .info-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    .list-items {
+      list-style: none;
+      padding: 0;
+    }
+
+    .list-items li {
+      padding: 4px 0;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .list-items li:last-child { border-bottom: none; }
+    .list-items li::before {
+      content: '→ ';
+      color: var(--accent);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Clara Pipeline Dashboard</h1>
+    <div class="header-stats" id="headerStats"></div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-title">Accounts</div>
+      <div id="accountList"></div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+      <div class="empty-state">Select an account to view details</div>
+    </main>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    let accounts = [];
+    let activeAccount = null;
+    let activeTab = 'overview';
+
+    // ═══════════════════════════════════════
+    // DATA LOADING
+    // ═══════════════════════════════════════
+    async function loadAccounts() {
+      const res = await fetch('/api/accounts');
+      accounts = await res.json();
+      renderAccountList();
+      loadStats();
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/summary');
+        const summary = await res.json();
+        const stats = document.getElementById('headerStats');
+        if (summary.pipeline_a) {
+          stats.innerHTML = `
+            <span class="stat-pill">Pipeline A: <strong>${summary.pipeline_a.success}/${summary.pipeline_a.total}</strong></span>
+            <span class="stat-pill">Pipeline B: <strong>${summary.pipeline_b.success}/${summary.pipeline_b.total}</strong></span>
+            <span class="stat-pill">Changes: <strong>${summary.pipeline_b.total_changes || 0}</strong></span>
+          `;
+        }
+      } catch (e) {}
+    }
+
+    async function loadAccountData(accountId) {
+      const data = { v1: {}, v2: {}, changelog: null };
+      try { data.v1.memo = await (await fetch(`/api/accounts/${accountId}/v1/memo`)).json(); } catch(e) {}
+      try { data.v1.spec = await (await fetch(`/api/accounts/${accountId}/v1/spec`)).json(); } catch(e) {}
+      try { data.v2.memo = await (await fetch(`/api/accounts/${accountId}/v2/memo`)).json(); } catch(e) {}
+      try { data.v2.spec = await (await fetch(`/api/accounts/${accountId}/v2/spec`)).json(); } catch(e) {}
+      try { data.changelog = await (await fetch(`/api/accounts/${accountId}/changelog`)).json(); } catch(e) {}
+      return data;
+    }
+
+    // ═══════════════════════════════════════
+    // RENDERING
+    // ═══════════════════════════════════════
+    function renderAccountList() {
+      const list = document.getElementById('accountList');
+      list.innerHTML = accounts.map(a => `
+        <div class="account-item ${activeAccount === a.account_id ? 'active' : ''}"
+             onclick="selectAccount('${a.account_id}')">
+          <span class="account-name">${a.company_name || a.account_id}</span>
+          <span class="version-badges">
+            ${a.has_v1 ? '<span class="badge badge-v1">v1</span>' : ''}
+            ${a.has_v2 ? '<span class="badge badge-v2">v2</span>' : ''}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    async function selectAccount(accountId) {
+      activeAccount = accountId;
+      renderAccountList();
+      const data = await loadAccountData(accountId);
+      renderContent(data);
+    }
+
+    function renderContent(data) {
+      const main = document.getElementById('mainContent');
+      const account = accounts.find(a => a.account_id === activeAccount);
+
+      main.innerHTML = `
+        <div class="fade-in">
+          <div class="tabs">
+            <button class="tab-btn ${activeTab === 'overview' ? 'active' : ''}" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn ${activeTab === 'memo-v1' ? 'active' : ''}" onclick="switchTab('memo-v1')">Memo v1</button>
+            <button class="tab-btn ${activeTab === 'memo-v2' ? 'active' : ''}" onclick="switchTab('memo-v2')">Memo v2</button>
+            <button class="tab-btn ${activeTab === 'agent-v1' ? 'active' : ''}" onclick="switchTab('agent-v1')">Agent v1</button>
+            <button class="tab-btn ${activeTab === 'agent-v2' ? 'active' : ''}" onclick="switchTab('agent-v2')">Agent v2</button>
+            <button class="tab-btn ${activeTab === 'diff' ? 'active' : ''}" onclick="switchTab('diff')">Diff Viewer</button>
+            <button class="tab-btn ${activeTab === 'prompt' ? 'active' : ''}" onclick="switchTab('prompt')">Prompt</button>
+          </div>
+          <div id="tabContent"></div>
+        </div>
+      `;
+
+      renderTab(data);
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      selectAccount(activeAccount);
+    }
+
+    function renderTab(data) {
+      const container = document.getElementById('tabContent');
+
+      switch (activeTab) {
+        case 'overview':
+          container.innerHTML = renderOverview(data);
+          break;
+        case 'memo-v1':
+          container.innerHTML = renderJsonCard('Account Memo v1 (Demo-derived)', data.v1.memo);
+          break;
+        case 'memo-v2':
+          container.innerHTML = renderJsonCard('Account Memo v2 (Onboarding-updated)', data.v2.memo);
+          break;
+        case 'agent-v1':
+          container.innerHTML = renderJsonCard('Agent Spec v1', data.v1.spec);
+          break;
+        case 'agent-v2':
+          container.innerHTML = renderJsonCard('Agent Spec v2', data.v2.spec);
+          break;
+        case 'diff':
+          container.innerHTML = renderDiff(data.changelog);
+          break;
+        case 'prompt':
+          container.innerHTML = renderPrompt(data);
+          break;
+      }
+    }
+
+    function renderOverview(data) {
+      const memo = data.v2?.memo || data.v1?.memo;
+      if (!memo) return '<div class="empty-state">No data available</div>';
+
+      return `
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Company</div>
+            <div class="info-value">${memo.company_name}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Account ID</div>
+            <div class="info-value">${memo.account_id}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Version</div>
+            <div class="info-value">${memo.version}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Business Hours</div>
+            <div class="info-value">${memo.business_hours?.days || '—'} ${memo.business_hours?.start || ''} - ${memo.business_hours?.end || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Timezone</div>
+            <div class="info-value">${memo.business_hours?.timezone || '—'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Address</div>
+            <div class="info-value">${memo.office_address || '—'}</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px">
+          <div class="card-title">Services Supported</div>
+          <ul class="list-items">
+            ${(memo.services_supported || []).map(s => `<li>${s}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Emergency Definitions</div>
+          <ul class="list-items">
+            ${(memo.emergency_definition || []).map(e => `<li>${e}</li>`).join('')}
+          </ul>
+        </div>
+
+        ${(memo.special_rules || []).length > 0 ? `
+        <div class="card">
+          <div class="card-title">Special Rules</div>
+          <ul class="list-items">
+            ${memo.special_rules.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>` : ''}
+
+        ${(memo.questions_or_unknowns || []).length > 0 ? `
+        <div class="card">
+          <div class="card-title">Questions / Unknowns</div>
+          <ul class="list-items">
+            ${memo.questions_or_unknowns.map(q => `<li>${q}</li>`).join('')}
+          </ul>
+        </div>` : ''}
+
+        ${data.changelog ? `
+        <div class="card">
+          <div class="card-title">Version Changes (v1 → v2)</div>
+          <div class="info-value" style="font-size: 0.85rem; color: var(--text-secondary)">
+            ${data.changelog.total_changes} field(s) updated during onboarding
+          </div>
+        </div>` : ''}
+      `;
+    }
+
+    function renderJsonCard(title, data) {
+      if (!data) return '<div class="empty-state">No data for this version</div>';
+      return `
+        <div class="card">
+          <div class="card-title">${title}</div>
+          <div class="json-viewer">${syntaxHighlight(JSON.stringify(data, null, 2))}</div>
+        </div>
+      `;
+    }
+
+    function renderDiff(changelog) {
+      if (!changelog || !changelog.changes) return '<div class="empty-state">No diff data available</div>';
+
+      return `
+        <div class="card" style="margin-bottom: 16px">
+          <div class="card-title">Changelog: ${changelog.company_name}</div>
+          <div class="info-value" style="font-size: 0.85rem; color: var(--text-secondary)">
+            ${changelog.total_changes} change(s) • ${changelog.from_version} → ${changelog.to_version} • ${changelog.timestamp?.slice(0, 10)}
+          </div>
+        </div>
+
+        ${changelog.changes.map(change => `
+          <div class="diff-item">
+            <div class="diff-header">
+              <span class="diff-field">${change.field}</span>
+              <span class="diff-reason">${change.reason}</span>
+            </div>
+            <div class="diff-body">
+              <div class="diff-row removed">
+                <span class="diff-label">v1</span>
+                <span>${formatDiffValue(change.from)}</span>
+              </div>
+              <div class="diff-row added">
+                <span class="diff-label">v2</span>
+                <span>${formatDiffValue(change.to)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function renderPrompt(data) {
+      const v1Prompt = data.v1?.spec?.system_prompt;
+      const v2Prompt = data.v2?.spec?.system_prompt;
+
+      let html = '';
+      if (v1Prompt) {
+        html += `<div class="card"><div class="card-title">System Prompt v1 (Demo)</div><div class="prompt-viewer">${escapeHtml(v1Prompt)}</div></div>`;
+      }
+      if (v2Prompt) {
+        html += `<div class="card"><div class="card-title">System Prompt v2 (Onboarding)</div><div class="prompt-viewer">${escapeHtml(v2Prompt)}</div></div>`;
+      }
+      return html || '<div class="empty-state">No prompt data</div>';
+    }
+
+    // ═══════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════
+    function syntaxHighlight(json) {
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+        let cls = 'json-number';
+        if (/^"/.test(match)) {
+          cls = /:$/.test(match) ? 'json-key' : 'json-string';
+        } else if (/true|false/.test(match)) {
+          cls = 'json-boolean';
+        } else if (/null/.test(match)) {
+          cls = 'json-null';
+        }
+        return `<span class="${cls}">${match}</span>`;
+      });
+    }
+
+    function formatDiffValue(val) {
+      if (val === null || val === undefined) return '<em style="color:var(--text-muted)">null</em>';
+      if (Array.isArray(val)) {
+        if (val.length === 0) return '<em style="color:var(--text-muted)">empty array</em>';
+        if (typeof val[0] === 'object') return escapeHtml(JSON.stringify(val, null, 1));
+        return val.map(v => `• ${escapeHtml(String(v))}`).join('<br>');
+      }
+      if (typeof val === 'object') return escapeHtml(JSON.stringify(val, null, 1));
+      return escapeHtml(String(val));
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    loadAccounts();
+  </script>
+</body>
+</html>

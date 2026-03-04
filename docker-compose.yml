@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: clara-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=clara2024
+      - GENERIC_TIMEZONE=America/New_York
+      - NODE_ENV=production
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./data:/data
+      - ./outputs:/outputs
+      - ./scripts:/scripts
+      - ./templates:/templates
+      - ./config.js:/app/config.js
+    working_dir: /app
+
+volumes:
+  n8n_data:

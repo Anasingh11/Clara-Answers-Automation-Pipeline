@@ -1,0 +1,179 @@
+{
+    "name": "Clara Pipeline B - Onboarding to Agent v2",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "pipeline-b",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook-trigger-b",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                300
+            ],
+            "webhookId": "pipeline-b-trigger"
+        },
+        {
+            "parameters": {
+                "functionCode": "// Validate and resolve file paths\nconst inputData = items[0].json;\nconst fs = require('fs');\n\nlet transcriptPath = inputData.file_path;\nif (!transcriptPath && inputData.transcript_text) {\n  transcriptPath = '/tmp/onboarding_' + Date.now() + '.txt';\n  fs.writeFileSync(transcriptPath, inputData.transcript_text);\n}\n\nif (!transcriptPath || !fs.existsSync(transcriptPath)) {\n  throw new Error('Onboarding transcript file not found');\n}\n\n// We need account_id to find v1 data\nlet account_id = inputData.account_id;\nif (!account_id) {\n  // Try to infer from filename\n  const path = require('path');\n  const filename = path.basename(transcriptPath, '.txt');\n  account_id = filename.replace(/^onboarding_/, '');\n}\n\nconst v1MemoPath = '/outputs/accounts/' + account_id + '/v1/memo.json';\nif (!fs.existsSync(v1MemoPath)) {\n  throw new Error('No v1 memo found for account: ' + account_id + '. Run Pipeline A first.');\n}\n\nreturn [{ json: { file_path: transcriptPath, account_id, v1_memo_path: v1MemoPath } }];"
+            },
+            "id": "validate-input-b",
+            "name": "Validate & Load v1",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Parse onboarding transcript and apply updates to v1 memo\nconst fs = require('fs');\nconst { parseTranscript } = require('/scripts/parse_transcript');\nconst { applyUpdates } = require('/scripts/apply_updates');\n\nconst data = items[0].json;\nconst v1Memo = JSON.parse(fs.readFileSync(data.v1_memo_path, 'utf-8'));\nconst parsed = parseTranscript(data.file_path);\nconst { v2Memo, changes } = applyUpdates(v1Memo, parsed);\n\nreturn [{ json: { v1Memo, v2Memo, changes, account_id: data.account_id } }];"
+            },
+            "id": "apply-updates",
+            "name": "Apply Onboarding Updates",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Generate v2 agent spec\nconst { generateAgentSpec } = require('/scripts/generate_agent');\nconst data = items[0].json;\nconst spec = generateAgentSpec(data.v2Memo);\nreturn [{ json: { ...data, spec } }];"
+            },
+            "id": "generate-spec-v2",
+            "name": "Generate v2 Agent Spec",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Generate changelog\nconst { generateChangelog } = require('/scripts/generate_changelog');\nconst data = items[0].json;\nconst changelog = generateChangelog(data.account_id, data.v2Memo.company_name, data.changes);\nreturn [{ json: { ...data, changelog } }];"
+            },
+            "id": "generate-changelog",
+            "name": "Generate Changelog",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Write all v2 outputs\nconst fs = require('fs');\nconst path = require('path');\nconst data = items[0].json;\nconst outputDir = path.join('/outputs/accounts', data.account_id, 'v2');\nfs.mkdirSync(outputDir, { recursive: true });\n\nfs.writeFileSync(path.join(outputDir, 'memo.json'), JSON.stringify(data.v2Memo, null, 2));\nfs.writeFileSync(path.join(outputDir, 'agent_spec.json'), JSON.stringify(data.spec, null, 2));\nfs.writeFileSync(path.join(outputDir, 'changes.json'), JSON.stringify(data.changelog.json, null, 2));\nfs.writeFileSync(path.join(outputDir, 'changes.md'), data.changelog.markdown);\n\nreturn [{ json: {\n  status: 'success',\n  account_id: data.account_id,\n  version: 'v2',\n  changes_count: data.changes.length,\n  outputs: {\n    memo: path.join(outputDir, 'memo.json'),\n    agent_spec: path.join(outputDir, 'agent_spec.json'),\n    changelog_json: path.join(outputDir, 'changes.json'),\n    changelog_md: path.join(outputDir, 'changes.md')\n  }\n} }];"
+            },
+            "id": "store-outputs-v2",
+            "name": "Store v2 Outputs",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Update task tracker\nconst fs = require('fs');\nconst data = items[0].json;\nconst tasksFile = '/outputs/tasks.json';\n\nlet tasks = { tasks: [] };\nif (fs.existsSync(tasksFile)) {\n  tasks = JSON.parse(fs.readFileSync(tasksFile, 'utf-8'));\n}\n\nconst task = {\n  id: 'TASK-' + String(tasks.tasks.length + 1).padStart(3, '0'),\n  account_id: data.account_id,\n  version: 'v2',\n  status: 'completed',\n  pipeline: 'Pipeline B (Onboarding → Update)',\n  changes_count: data.changes_count,\n  created_at: new Date().toISOString(),\n  updated_at: new Date().toISOString()\n};\n\ntasks.tasks.push(task);\nfs.writeFileSync(tasksFile, JSON.stringify(tasks, null, 2));\n\nreturn [{ json: { ...data, task } }];"
+            },
+            "id": "update-task-v2",
+            "name": "Update Task Tracker",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1560,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Validate & Load v1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate & Load v1": {
+            "main": [
+                [
+                    {
+                        "node": "Apply Onboarding Updates",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Apply Onboarding Updates": {
+            "main": [
+                [
+                    {
+                        "node": "Generate v2 Agent Spec",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate v2 Agent Spec": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Changelog",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Changelog": {
+            "main": [
+                [
+                    {
+                        "node": "Store v2 Outputs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Store v2 Outputs": {
+            "main": [
+                [
+                    {
+                        "node": "Update Task Tracker",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        {
+            "name": "clara-pipeline"
+        },
+        {
+            "name": "onboarding-update"
+        }
+    ]
+}

@@ -1,0 +1,83 @@
+[Onboarding Call Transcript]
+Account: Ben's Electric (bens_electric)
+Date: 2024-11-22
+Duration: 0:43:15
+Participants: Clara Onboarding Specialist (Riley), Ben Penoyer (Owner), Mike (Operations Manager)
+
+---
+
+Riley: Ben, Mike, welcome to onboarding! Congrats on choosing Clara. Today we're going to lock down every detail so your agent works perfectly from day one. I've got notes from your demo call, so let's confirm and fill in the gaps. Sound good?
+
+Ben: Let's do it.
+
+Riley: Alright. First, let's confirm your business hours. From the demo I have Monday through Friday, 7 AM to 5 PM Eastern. Is that correct?
+
+Ben: Actually it's 7 AM to 5:30 PM. We extended our hours last month. And it's Eastern time zone, yes.
+
+Riley: Got it — 7 AM to 5:30 PM Eastern, Monday through Friday. And you mentioned Saturday on-call for emergencies?
+
+Mike: Yeah, Saturdays we're not officially open but we do have someone available for emergencies only. Same with Sundays and holidays.
+
+Riley: Perfect. Now let's confirm your office address for reference.
+
+Ben: 4521 Trade Street, Suite B, Charlotte, North Carolina 28203.
+
+Riley: Got it. Now let's nail down the services you offer so Clara can speak to them accurately.
+
+Ben: We do residential electrical service and repair, commercial electrical including tenant improvements, panel upgrades and installations, generator installation and service, EV charger installation, lighting retrofits for commercial buildings, and electrical safety inspections.
+
+Mike: Also emergency electrical repair — that's twenty-four seven.
+
+Riley: Great list. Now let's define exactly what constitutes an electrical emergency. From the demo call we had: sparking, arcing, burning smell, hot panel, complete power loss in commercial, and exposed wiring. Anything to add or change?
+
+Ben: Those are right. Add generator failure for clients with backup systems — if their generator won't start during an outage, that's an emergency. And also any situation where a customer says they smell gas near electrical equipment — they should call 911 first but we need to be notified too.
+
+Mike: Oh and if we have electrical components submerged in water — like a flooding basement with an electrical panel, that's critical.
+
+Riley: Perfect. Let's talk about emergency routing. From the demo I have: first try Ben, then Mike, then Dave. Can you give me the phone numbers?
+
+Ben: Sure. My cell is 704-555-0142. Mike is 704-555-0198. Dave is 704-555-0267.
+
+Riley: And what should the timeout be before moving to the next person?
+
+Ben: Give each person about forty-five seconds to answer. If they don't pick up in forty-five seconds, try the next person.
+
+Riley: And if none of the three answer?
+
+Ben: Clara should apologize, take all their info — name, phone number, address, description of the issue — and tell them we guarantee a callback within thirty minutes. Then send an urgent notification to all three of us.
+
+Riley: Perfect. Now for non-emergency calls during business hours — how should Clara handle those?
+
+Mike: She should collect the caller's name, phone number, and what they need. Then try to transfer them to our office line, which is 704-555-0100. If Sarah picks up, great. If it goes unanswered after thirty seconds, Clara should let the caller know someone will call them back within an hour.
+
+Riley: And for non-emergency calls after hours?
+
+Ben: Clara should collect their info and let them know we'll reach out the next business day. No need to try to transfer or page anyone for non-emergencies.
+
+Riley: Makes sense. Now let's talk about the ServiceTrade integration constraint. From the demo, you were very clear that Clara should never create jobs automatically in ServiceTrade. That still the case?
+
+Ben: Absolutely. Never create jobs in ServiceTrade. Clara collects the info, we review it in the morning and create the job manually.
+
+Riley: Got it — hard rule, no exceptions. Now I want to make sure we have the call transfer protocol right. During business hours, if a call needs to go to your office, Clara will transfer to 704-555-0100. If the transfer fails — line busy, no answer after thirty seconds — what should Clara say?
+
+Mike: She should tell the caller something like "I wasn't able to reach the office right now. I've captured all your information and someone from our team will call you back within one hour. Is there anything else I can help with?"
+
+Riley: Perfect. And one more thing — when Clara greets callers, what should she say?
+
+Ben: Something like "Thank you for calling Ben's Electric, this is Clara, how can I help you today?" Keep it friendly and professional.
+
+Riley: Love it. And for after-hours greeting?
+
+Ben: "Thank you for calling Ben's Electric. Our office is currently closed. Our regular business hours are Monday through Friday, 7 AM to 5:30 PM. If this is an electrical emergency, I can connect you with our on-call technician right away. How can I help you?"
+
+Riley: That's thorough. Any other special handling or edge cases?
+
+Mike: Yeah — if someone calls about an EV charger issue, even after hours, that's not an emergency unless there's sparking or a burning smell. Just take their info for a next-day callback.
+
+Ben: Also, our commercial clients sometimes reference their account numbers. Clara should ask for their account number if they mention they're an existing commercial client. It helps us pull up their info faster.
+
+Riley: Great details. I think we've got everything we need. I'll have your agent configured and ready for testing within forty-eight hours. We'll do a test call together before going live. Sound good?
+
+Ben: Sounds great. Thanks Riley.
+
+[End of call]

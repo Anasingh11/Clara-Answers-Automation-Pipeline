@@ -1,0 +1,118 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Retell Agent Draft Spec",
+    "type": "object",
+    "required": [
+        "agent_name",
+        "version"
+    ],
+    "properties": {
+        "agent_name": {
+            "type": "string"
+        },
+        "voice_style": {
+            "type": "string"
+        },
+        "language": {
+            "type": "string"
+        },
+        "system_prompt": {
+            "type": "string"
+        },
+        "key_variables": {
+            "type": "object",
+            "properties": {
+                "company_name": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "business_hours": {
+                    "type": "string"
+                },
+                "office_address": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "emergency_routing": {
+                    "type": "object"
+                },
+                "services": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "tool_invocations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tool_name": {
+                        "type": "string"
+                    },
+                    "trigger": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "call_transfer_protocol": {
+            "type": "object",
+            "properties": {
+                "business_hours_target": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "emergency_chain": {
+                    "type": "array"
+                },
+                "timeout_seconds": {
+                    "type": "integer"
+                },
+                "max_retries": {
+                    "type": "integer"
+                }
+            }
+        },
+        "fallback_protocol": {
+            "type": "object",
+            "properties": {
+                "collect_fields": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "message_to_caller": {
+                    "type": "string"
+                },
+                "notification_method": {
+                    "type": "string"
+                }
+            }
+        },
+        "version": {
+            "type": "string"
+        },
+        "account_id": {
+            "type": "string"
+        },
+        "created_at": {
+            "type": "string"
+        },
+        "updated_at": {
+            "type": "string"
+        }
+    }
+}
